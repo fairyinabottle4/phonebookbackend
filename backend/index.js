@@ -71,21 +71,13 @@ app.get('/api/persons/:id', (request, response) => {
   })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-  
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id
+  Person.findByIdAndDelete(id)
+    .then(() => response.status(204).end())
+    .catch((error) => next(error))
 })
   
-const generateId = () => {
-  const maxInteger = Number.MAX_SAFE_INTEGER  
-  function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
-  } 
-  return getRandomArbitrary(0, maxInteger)
-}
-
 app.post('/api/persons', (request, response) => {
   const body = request.body
   if (!body.name || !body.number) {
@@ -101,15 +93,35 @@ app.post('/api/persons', (request, response) => {
       }) 
   }
 
-  const person = {
+  const person = new Person ({
     name: body.name,
     number: body.number,
-  }
-
+  })
+  console.log("this is still fine")
   person.save().then(savedNote => {
     response.json(savedNote)
   })
 })
+
+app.put('/api/persons/:id', (req, res, next) => {
+  const id = req.params.id
+
+  const entry = {
+    name: req.body.name,
+    number: req.body.number,
+  }
+
+  Person.findByIdAndUpdate(id, entry, { new: true })
+    .then((updatedEntry) => {
+      if (updatedEntry) {
+        res.json(updatedEntry.toJSON())
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch((error) => next(error))
+})
+
 
   
 const PORT = process.env.PORT
