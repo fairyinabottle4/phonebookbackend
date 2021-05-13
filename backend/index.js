@@ -86,12 +86,12 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const isDuplicate = persons.find(element => element.name === body.name)
-  if (isDuplicate) {
-      return response.status(400).json({
-          error: 'duplicate entry'
-      }) 
-  }
+  // const isDuplicate = persons.find(element => element.name === body.name)
+  // if (isDuplicate) {
+  //     return response.status(400).json({
+  //         error: 'duplicate entry'
+  //     }) 
+  //}
 
   const person = new Person ({
     name: body.name,
@@ -122,6 +122,25 @@ app.put('/api/persons/:id', (req, res, next) => {
     .catch((error) => next(error))
 })
 
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
   
 const PORT = process.env.PORT
