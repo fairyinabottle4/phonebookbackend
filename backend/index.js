@@ -91,14 +91,6 @@ app.post('/api/persons', (request, response, next) => {
       error: 'content missing' 
     })
   }
-
-  // const isDuplicate = persons.find(element => element.name === body.name)
-  // if (isDuplicate) {
-  //     return response.status(400).json({
-  //         error: 'duplicate entry'
-  //     }) 
-  //}
-
   const person = new Person ({
     name: body.name,
     number: body.number,
